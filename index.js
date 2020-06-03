@@ -71,18 +71,51 @@ server.get("/api/users/:id", (req, res) => {
 
 // a funciton to handle delete requests
 server.delete("/api/users/:id", (req, res) => {
-  const { id } = req.params;
-  users = users.filter((user) => {
-    if (user.id == { id }) {
-      res.status(404).json({
-        errorMessage: "The user with the specified ID does not exist.",
-      });
-    } else if (!user) {
-      res.status(500).json({ errorMessage: "The user could not be removed" });
-    } else if (user.id !== { id }) {
-      res.status(200).json(user);
-    }
-  });
+  const id = req.params.id;
+  const remove = users.filter((user) => user.id == id);
+
+  if (id === undefined) {
+    res
+      .status(404)
+      .json({ message: "The user with the specified ID does not exist." });
+  } else if (!remove) {
+    res.status(500).json({ errorMessage: "The user could not be removed." });
+  } else {
+    users = users.filter((user) => user.id !== id);
+    res.status(200).json(remove);
+  }
+});
+
+// a function to handle put requests
+
+server.put("/api/users/:id", (req, res) => {
+  const id = req.params.id;
+  const update = req.body;
+
+  update.id = id;
+
+  if (id === undefined) {
+    res
+      .status(404)
+      .json({ message: "The user with the specified ID does not exist." });
+  } else if (
+    update.name === null ||
+    update.bio === null ||
+    update.name === "" ||
+    update.bio === ""
+  ) {
+    res
+      .status(400)
+      .json({ errorMessage: "Please provide name and bio for the user." });
+  } else if (!update) {
+    res
+      .status(500)
+      .json({ errorMessage: "The user information could not be modified." });
+  } else {
+    users = users.filter((user) => user.id !== id);
+    users.push(update);
+    res.status(200).json(update);
+  }
 });
 
 // listen to server port
